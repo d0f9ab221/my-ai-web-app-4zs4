@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Szier OptiSqueeze - Premium Image Compressor</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+<style>
+/* --- CSS: /styles.css --- */
+/* Custom range input styling for a premium look */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #1e293b; /* slate-800 */
+  border-radius: 9999px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #10b981; /* emerald-500 */
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.1s ease;
+  border: 2px solid #09090b; /* zinc-950 */
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: #34d399; /* emerald-400 */
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.1s ease;
+  border: 2px solid #09090b;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  background: #34d399;
+}
+
+/* Custom Scrollbar for Queue List */
+#batchListContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+#batchListContainer::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+}
+
+#batchListContainer::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.5);
+  border-radius: 3px;
+}
+
+#batchListContainer::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5);
+}
+
+/* Smooth transition for active presets */
+.preset-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom animations */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+.pulse-soft {
+  animation: pulse-soft 3s infinite ease-in-out;
+}
+
+</style></head>
+<body class="bg-[#09090b] text-slate-100 font-sans min-h-screen flex flex-col selection:bg-emerald-500/30 selection:text-emerald-300">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-[#09090b]/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/5">
+          <i data-lucide="sparkles" class="w-6 h-6 animate-pulse"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+            Szier <span class="text-emerald-400 font-medium text-sm px-2 py-0.5 bg-emerald-500/10 rounded-full border border-emerald-500/20">OptiSqueeze</span>
+          </h1>
+          <p class="text-xs text-slate-400">Lower image weight, preserve premium quality</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <button id="soundToggleBtn" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:bg-slate-800 text-slate-300 transition-all" title="Toggle Sound Effects">
+          <i data-lucide="volume-2" class="w-4 h-4"></i>
+        </button>
+        <a href="#" id="resetAppBtn" class="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-800 hover:border-slate-700">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset Workspace
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Left Column: Controls & Upload (4 Cols) -->
+    <section class="lg:col-span-4 space-y-6">
+      
+      <!-- Upload Box -->
+      <div id="dropzone" class="border-2 border-dashed border-slate-800 hover:border-emerald-500/50 bg-slate-900/20 hover:bg-emerald-500/[0.02] rounded-2xl p-6 text-center cursor-pointer transition-all duration-300 group relative overflow-hidden">
+        <input type="file" id="fileInput" class="hidden" accept="image/*" multiple />
+        <div class="space-y-4 py-4">
+          <div class="mx-auto w-14 h-14 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-400 group-hover:text-emerald-400 group-hover:bg-emerald-500/10 transition-all duration-300">
+            <i data-lucide="upload-cloud" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-200">Drag & drop your images here</p>
+            <p class="text-xs text-slate-400 mt-1">Supports JPEG, PNG, WebP, HEIC</p>
+          </div>
+          <button class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs rounded-lg transition-all shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 inline-flex items-center gap-1.5">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Browse Files
+          </button>
+        </div>
+      </div>
+
+      <!-- Compression Settings Card -->
+      <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 space-y-6 backdrop-blur-sm">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+          <h2 class="font-bold text-sm text-white flex items-center gap-2">
+            <i data-lucide="sliders" class="w-4 h-4 text-emerald-400"></i> Compression Settings
+          </h2>
+          <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Engine v1.2</span>
+        </div>
+
+        <!-- Presets -->
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i> Optimization Preset
+          </label>
+          <div class="grid grid-cols-2 gap-2" id="presetContainer">
+            <!-- Dynamic Presets from data.js -->
+          </div>
+        </div>
+
+        <!-- Format Selector -->
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-slate-300 flex items-center justify-between">
+            <span>Output Format</span>
+            <span class="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.5 rounded">WebP Recommended</span>
+          </label>
+          <div class="grid grid-cols-3 gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800">
+            <button data-format="image/webp" class="format-btn py-1.5 text-xs font-medium rounded-md transition-all text-slate-400 hover:text-white">WebP</button>
+            <button data-format="image/jpeg" class="format-btn py-1.5 text-xs font-medium rounded-md transition-all text-slate-400 hover:text-white">JPEG</button>
+            <button data-format="original" class="format-btn py-1.5 text-xs font-medium rounded-md transition-all text-slate-400 hover:text-white">Original</button>
+          </div>
+        </div>
+
+        <!-- Quality Slider -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-medium text-slate-300">Visual Quality</span>
+            <span id="qualityVal" class="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">80%</span>
+          </div>
+          <input type="range" id="qualitySlider" min="5" max="100" value="80" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
+          <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+            <span>Max Squeeze (5%)</span>
+            <span>Perfect Quality (100%)</span>
+          </div>
+        </div>
+
+        <!-- Resize Controls -->
+        <div class="space-y-3 pt-2 border-t border-slate-800/60">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+              <i data-lucide="maximize-2" class="w-3.5 h-3.5 text-blue-400"></i> Resize Dimensions
+            </label>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-400">
+              <input type="checkbox" id="aspectRatioLock" checked class="rounded bg-slate-950 border-slate-800 text-emerald-500 focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5" />
+              Lock Aspect Ratio
+            </label>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase font-mono">Width (px)</span>
+              <input type="number" id="resizeWidth" placeholder="Original" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono" />
+            </div>
+            <div class="space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase font-mono">Height (px)</span>
+              <input type="number" id="resizeHeight" placeholder="Original" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono" />
+            </div>
+          </div>
+
+          <!-- Scale Slider -->
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-[11px]">
+              <span class="text-slate-400">Scale Percentage</span>
+              <span id="scaleVal" class="font-mono text-slate-300">100%</span>
+            </div>
+            <input type="range" id="scaleSlider" min="10" max="100" value="100" step="5" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
+          </div>
+        </div>
+
+        <!-- Advanced Options -->
+        <div class="pt-3 border-t border-slate-800/60 space-y-2">
+          <label class="inline-flex items-center gap-2 cursor-pointer text-xs text-slate-300">
+            <input type="checkbox" id="stripMetadata" checked class="rounded bg-slate-950 border-slate-800 text-emerald-500 focus:ring-0 focus:ring-offset-0 w-4 h-4" />
+            Strip Metadata (EXIF, GPS, etc.)
+          </label>
+          <p class="text-[10px] text-slate-500 pl-6">Removes hidden camera details to save extra bytes.</p>
+        </div>
+
+      </div>
+
+      <!-- Pro Tip Card -->
+      <div class="bg-emerald-500/[0.02] border border-emerald-500/10 rounded-2xl p-4 flex gap-3">
+        <div class="text-emerald-400 shrink-0 mt-0.5">
+          <i data-lucide="info" class="w-4 h-4"></i>
+        </div>
+        <div class="space-y-1">
+          <h4 class="text-xs font-semibold text-emerald-300">Why WebP format?</h4>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            WebP provides superior lossless and lossy compression for images on the web. It can make your images up to <strong class="text-emerald-300">3x lighter</strong> than JPEG without losing visible quality!
+          </p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Right Column: Interactive Viewer & Batch List (8 Cols) -->
+    <section class="lg:col-span-8 space-y-6 flex flex-col">
+      
+      <!-- Empty State (No Image Uploaded) -->
+      <div id="emptyState" class="flex-1 min-h-[450px] bg-slate-900/20 border border-slate-800/80 rounded-2xl flex flex-col items-center justify-center p-8 text-center space-y-4 backdrop-blur-sm">
+        <div class="w-16 h-16 rounded-2xl bg-slate-800/50 flex items-center justify-center text-slate-500 border border-slate-700/30">
+          <i data-lucide="image" class="w-8 h-8"></i>
+        </div>
+        <div class="max-w-md space-y-2">
+          <h3 class="text-lg font-bold text-white">No images loaded yet</h3>
+          <p class="text-sm text-slate-400">
+            Upload one or more images to start reducing their weight while keeping the best quality. You can compare original vs compressed side-by-side!
+          </p>
+        </div>
+        <button id="emptyStateUploadBtn" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-xl transition-all border border-slate-700/50 inline-flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> Select Images
+        </button>
+      </div>
+
+      <!-- Active Workspace (Visible when images are loaded) -->
+      <div id="activeWorkspace" class="hidden space-y-6 flex-1 flex flex-col">
+        
+        <!-- Comparison Viewer Card -->
+        <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 backdrop-blur-sm space-y-4">
+          
+          <!-- Viewer Header / Stats -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800/60">
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider bg-slate-800 px-2.5 py-1 rounded-md" id="activeFileName">image.jpg</span>
+              <span class="text-xs text-slate-400 font-mono" id="activeFileResolution">1920x1080</span>
+            </div>
+            
+            <!-- Compression Stats Badge -->
+            <div class="flex items-center gap-2">
+              <div class="text-right">
+                <div class="text-xs text-slate-400 font-mono">
+                  <span id="statOriginalSize" class="line-through text-slate-500">0 KB</span> 
+                  <i data-lucide="arrow-right" class="inline w-3 h-3 mx-1 text-slate-400"></i> 
+                  <span id="statCompressedSize" class="text-emerald-400 font-bold">0 KB</span>
+                </div>
+              </div>
+              <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-extrabold px-2.5 py-1.5 rounded-lg font-mono" id="statSavings">
+                -0%
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Split Screen Slider Container -->
+          <div class="relative w-full h-[380px] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 select-none group/viewer" id="comparisonContainer">
+            
+            <!-- Left Side: Original Image -->
+            <div class="absolute inset-0 w-full h-full" id="originalWrapper">
+              <img id="originalImg" class="absolute inset-0 w-full h-full object-contain pointer-events-none" src="" alt="Original" />
+              <div class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-slate-300 text-[10px] font-bold px-2 py-1 rounded border border-slate-800 uppercase tracking-wider z-10">
+                Original
+              </div>
+            </div>
+
+            <!-- Right Side: Compressed Image (Clipped dynamically) -->
+            <div class="absolute inset-0 w-full h-full overflow-hidden" id="compressedWrapper" style="clip-path: inset(0 0 0 50%);">
+              <img id="compressedImg" class="absolute inset-0 w-full h-full object-contain pointer-events-none" src="" alt="Compressed" />
+              <div class="absolute top-3 right-3 bg-emerald-500/90 text-slate-950 text-[10px] font-extrabold px-2 py-1 rounded uppercase tracking-wider z-10">
+                Compressed
+              </div>
+            </div>
+
+            <!-- Split Handle Slider Line -->
+            <div class="absolute top-0 bottom-0 w-1 bg-emerald-400 cursor-ew-resize z-20 shadow-[0_0_10px_rgba(52,211,153,0.5)]" id="sliderHandle" style="left: 50%;">
+              <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-emerald-400 text-slate-950 rounded-full flex items-center justify-center shadow-lg border-2 border-slate-950 hover:scale-110 transition-transform">
+                <i data-lucide="chevrons-left-right" class="w-4 h-4"></i>
+              </div>
+            </div>
+
+            <!-- Zoom / Pan Overlay Info -->
+            <div class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-slate-950/80 backdrop-blur-md text-slate-400 text-[11px] px-3 py-1.5 rounded-full border border-slate-800/80 flex items-center gap-1.5 pointer-events-none opacity-0 group-hover/viewer:opacity-100 transition-opacity duration-300">
+              <i data-lucide="move" class="w-3.5 h-3.5 text-emerald-400"></i> Drag the green slider to compare quality
+            </div>
+          </div>
+
+          <!-- Action Buttons for Active Image -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div class="flex items-center gap-2">
+              <button id="zoomInBtn" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 border border-slate-700/50 transition-all" title="Fit Image">
+                <i data-lucide="maximize" class="w-4 h-4"></i>
+              </button>
+              <span class="text-xs text-slate-400">Visual comparison is rendered at 100% fit.</span>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <button id="downloadActiveBtn" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-lg transition-all shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 flex items-center gap-1.5">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> Download This Image
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Batch List Card -->
+        <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                <i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i> Queue & Batch Processing
+              </h3>
+              <span id="queueCountBadge" class="bg-slate-800 text-slate-300 text-[11px] font-mono px-2 py-0.5 rounded-full border border-slate-700/50">0 Files</span>
+            </div>
+            <button id="downloadAllBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 border border-slate-700/50 font-semibold text-xs rounded-lg transition-all flex items-center gap-1.5">
+              <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i> Download All (.ZIP / Batch)
+            </button>
+          </div>
+
+          <!-- Queue Table/List -->
+          <div class="overflow-hidden rounded-xl border border-slate-800/80 bg-slate-950/40">
+            <div class="max-h-[220px] overflow-y-auto divide-y divide-slate-800/60" id="batchListContainer">
+              <!-- Dynamic Queue Items -->
+            </div>
+          </div>
+
+          <!-- Batch Summary Stats -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-950/80 p-4 rounded-xl border border-slate-800/80">
+            <div class="space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase tracking-wider font-mono">Total Original Weight</span>
+              <p class="text-base font-bold text-white font-mono" id="batchTotalOriginal">0.00 MB</p>
+            </div>
+            <div class="space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase tracking-wider font-mono">Total Compressed Weight</span>
+              <p class="text-base font-bold text-emerald-400 font-mono" id="batchTotalCompressed">0.00 MB</p>
+            </div>
+            <div class="space-y-1">
+              <span class="text-[10px] text-slate-400 uppercase tracking-wider font-mono">Total Space Saved</span>
+              <p class="text-base font-extrabold text-emerald-400 font-mono flex items-center gap-1.5" id="batchTotalSavings">
+                0% <span class="text-xs font-normal text-slate-400">(0 KB)</span>
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/60 bg-slate-950/40 py-6 px-6 mt-auto">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <p>&copy; Szier OptiSqueeze. All compression is performed 100% locally in your browser. Your images are never uploaded to any server.</p>
+      <div class="flex items-center gap-4">
+        <span class="flex items-center gap-1 text-emerald-500/80"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Secure & Private</span>
+        <span class="text-slate-700">|</span>
+        <span>High-Fidelity Canvas Resizer</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  
+  
+  
+<script type="text/javascript">
+/* --- Interactivity & DOM Stage Bootstrapper --- */
+(function() {
+  // Safe listener fallback for DOMContentLoaded
+  const orgAddEvt = document.addEventListener;
+  document.addEventListener = function(type, listener, options) {
+    if (type === 'DOMContentLoaded' && document.readyState !== 'loading') {
+      setTimeout(listener, 1);
+    } else {
+      orgAddEvt.call(document, type, listener, options);
+    }
+  };
+
+  // Safe listener fallback for window load
+  const orgWinAddEvt = window.addEventListener;
+  window.addEventListener = function(type, listener, options) {
+    if (type === 'load' && document.readyState === 'complete') {
+      setTimeout(listener, 1);
+    } else {
+      orgWinAddEvt.call(window, type, listener, options);
+    }
+  };
+
+  // Safe callback mapping for window.onload on late loads
+  let winOnload = null;
+  Object.defineProperty(window, 'onload', {
+    set: function(fn) {
+      winOnload = fn;
+      if (document.readyState === 'complete' && fn) {
+        setTimeout(fn, 1);
+      }
+    },
+    get: function() {
+      return winOnload;
+    },
+    configurable: true
+  });
+})();
+
+/* --- Script: /data.js --- */
+// Static presets and configurations for the Image Compressor
+window.AppPresets = [
+  {
+    id: 'best-quality',
+    name: 'Best Quality (WebP)',
+    quality: 0.90,
+    format: 'image/webp',
+    desc: '90% Quality. Drastic weight reduction, zero visible loss.',
+    icon: 'sparkles',
+    badge: 'Recommended'
+  },
+  {
+    id: 'balanced',
+    name: 'Balanced Squeeze',
+    quality: 0.75,
+    format: 'image/webp',
+    desc: '75% Quality. Perfect balance for web performance.',
+    icon: 'scale',
+    badge: 'Popular'
+  },
+  {
+    id: 'extreme',
+    name: 'Extreme Squeeze',
+    quality: 0.45,
+    format: 'image/webp',
+    desc: '45% Quality. Maximum weight reduction for ultra-fast load.',
+    icon: 'zap',
+    badge: 'Tiny Size'
+  },
+  {
+    id: 'high-jpeg',
+    name: 'High Compatibility (JPG)',
+    quality: 0.85,
+    format: 'image/jpeg',
+    desc: '85% Quality JPEG. High compatibility across older devices.',
+    icon: 'image',
+    badge: 'Legacy'
+  }
+];
+
+// Supported formats mapping
+window.AppFormats = {
+  'image/webp': { label: 'WebP', ext: 'webp' },
+  'image/jpeg': { label: 'JPEG', ext: 'jpg' },
+  'image/png': { label: 'PNG', ext: 'png' }
+};
+
+
+/* --- Script: /utils.js --- */
+// Utility functions and Web Audio API synthesizer for premium sound feedback
+window.AppUtils = {
+  
+  // Format bytes to human readable string
+  formatBytes: function(bytes, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  },
+
+  // Sound Synthesizer using Web Audio API
+  audioCtx: null,
+  soundEnabled: true,
+
+  initAudio: function() {
+    if (!this.audioCtx) {
+      this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  },
+
+  playNotification: function(type) {
+    if (!this.soundEnabled) return;
+    try {
+      this.initAudio();
+      const ctx = this.audioCtx;
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      const now = ctx.currentTime;
+
+      if (type === 'upload') {
+        // Soft pleasant sweep up
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'success') {
+        // Double chime
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      } else if (type === 'click') {
+        // Tiny click
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } else if (type === 'delete') {
+        // Soft sweep down
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(200, now + 0.2);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      }
+    } catch (e) {
+      console.warn('Audio feedback failed to play:', e);
+    }
+  },
+
+  // Core Image Compression Engine
+  compressImage: function(file, options) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = function(event) {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = function() {
+          // Calculate target dimensions
+          let targetWidth = img.naturalWidth;
+          let targetHeight = img.naturalHeight;
+
+          // Apply scale factor
+          if (options.scale && options.scale < 100) {
+            const factor = options.scale / 100;
+            targetWidth = Math.round(targetWidth * factor);
+            targetHeight = Math.round(targetHeight * factor);
+          }
+
+          // Apply custom width/height overrides
+          if (options.width) {
+            targetWidth = parseInt(options.width, 10);
+            if (options.lockAspectRatio) {
+              const ratio = img.naturalHeight / img.naturalWidth;
+              targetHeight = Math.round(targetWidth * ratio);
+            }
+          }
+          if (options.height && !options.lockAspectRatio) {
+            targetHeight = parseInt(options.height, 10);
+          }
+
+          // Create canvas
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d');
+
+          // Draw image with high quality scaling
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+          // Determine format
+          let exportFormat = options.format;
+          if (exportFormat === 'original') {
+            exportFormat = file.type;
+          }
+
+          // Canvas export quality (0.0 to 1.0)
+          const exportQuality = options.quality;
+
+          // Convert to blob
+          canvas.toBlob(function(blob) {
+            if (!blob) {
+              reject(new Error('Canvas compression failed to generate blob.'));
+              return;
+            }
+
+            // Create object URL for previewing
+            const compressedUrl = URL.createObjectURL(blob);
+            
+            resolve({
+              blob: blob,
+              dataUrl: compressedUrl,
+              width: targetWidth,
+              height: targetHeight,
+              size: blob.size,
+              format: exportFormat
+            });
+          }, exportFormat, exportQuality);
+        };
+        img.onerror = function(err) {
+          reject(err);
+        };
+      };
+      reader.onerror = function(err) {
+        reject(err);
+      };
+    });
+  }
+};
+
+
+/* --- Script: /script.js --- */
+// Main Application Controller
+document.addEventListener('DOMContentLoaded', () => {
+  // State Management
+  const state = {
+    files: [], // Array of file objects: { id, file, originalSize, originalUrl, compressedUrl, compressedSize, width, height, format, active: boolean }
+    activeFileIndex: -1,
+    options: {
+      preset: 'best-quality',
+      format: 'image/webp',
+      quality: 0.90,
+      scale: 100,
+      width: null,
+      height: null,
+      lockAspectRatio: true,
+      stripMetadata: true
+    }
+  };
+
+  // DOM Elements
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const emptyState = document.getElementById('emptyState');
+  const emptyStateUploadBtn = document.getElementById('emptyStateUploadBtn');
+  const activeWorkspace = document.getElementById('activeWorkspace');
+  
+  // Controls
+  const presetContainer = document.getElementById('presetContainer');
+  const qualitySlider = document.getElementById('qualitySlider');
+  const qualityVal = document.getElementById('qualityVal');
+  const scaleSlider = document.getElementById('scaleSlider');
+  const scaleVal = document.getElementById('scaleVal');
+  const resizeWidth = document.getElementById('resizeWidth');
+  const resizeHeight = document.getElementById('resizeHeight');
+  const aspectRatioLock = document.getElementById('aspectRatioLock');
+  const stripMetadata = document.getElementById('stripMetadata');
+  const soundToggleBtn = document.getElementById('soundToggleBtn');
+  const resetAppBtn = document.getElementById('resetAppBtn');
+
+  // Viewer & Stats
+  const activeFileName = document.getElementById('activeFileName');
+  const activeFileResolution = document.getElementById('activeFileResolution');
+  const statOriginalSize = document.getElementById('statOriginalSize');
+  const statCompressedSize = document.getElementById('statCompressedSize');
+  const statSavings = document.getElementById('statSavings');
+  const originalImg = document.getElementById('originalImg');
+  const compressedImg = document.getElementById('compressedImg');
+  const comparisonContainer = document.getElementById('comparisonContainer');
+  const originalWrapper = document.getElementById('originalWrapper');
+  const compressedWrapper = document.getElementById('compressedWrapper');
+  const sliderHandle = document.getElementById('sliderHandle');
+  const downloadActiveBtn = document.getElementById('downloadActiveBtn');
+  const zoomInBtn = document.getElementById('zoomInBtn');
+
+  // Batch Queue
+  const queueCountBadge = document.getElementById('queueCountBadge');
+  const batchListContainer = document.getElementById('batchListContainer');
+  const downloadAllBtn = document.getElementById('downloadAllBtn');
+  const batchTotalOriginal = document.getElementById('batchTotalOriginal');
+  const batchTotalCompressed = document.getElementById('batchTotalCompressed');
+  const batchTotalSavings = document.getElementById('batchTotalSavings');
+
+  // Initialize Presets UI
+  function initPresets() {
+    presetContainer.innerHTML = '';
+    window.AppPresets.forEach(preset => {
+      const btn = document.createElement('button');
+      btn.className = `preset-card text-left p-2.5 rounded-xl border text-xs transition-all flex flex-col justify-between gap-1.5 ${ 
+        state.options.preset === preset.id 
+          ? 'bg-emerald-500/10 border-emerald-500 text-white shadow-md shadow-emerald-500/5' 
+          : 'bg-slate-950 border-slate-800 hover:border-slate-700 text-slate-300'
+      }`;
+      btn.dataset.id = preset.id;
+      
+      btn.innerHTML = `
+        <div class="flex items-center justify-between w-full">
+          <span class="font-bold text-slate-200">${preset.name}</span>
+          <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">${preset.badge}</span>
+        </div>
+        <p class="text-[10px] text-slate-400 leading-tight">${preset.desc}</p>
+      `;
+      
+      btn.addEventListener('click', () => {
+        window.AppUtils.playNotification('click');
+        applyPreset(preset);
+      });
+      presetContainer.appendChild(btn);
+    });
+  }
+
+  // Apply Preset Values to State & UI
+  function applyPreset(preset) {
+    state.options.preset = preset.id;
+    state.options.format = preset.format;
+    state.options.quality = preset.quality;
+    
+    // Update UI controls
+    qualitySlider.value = Math.round(preset.quality * 100);
+    qualityVal.textContent = `${Math.round(preset.quality * 100)}%`;
+    
+    updateFormatButtons();
+    initPresets();
+    recompressAll();
+  }
+
+  // Update Format Button Active States
+  function updateFormatButtons() {
+    document.querySelectorAll('.format-btn').forEach(btn => {
+      const fmt = btn.dataset.format;
+      if (state.options.format === fmt) {
+        btn.className = 'format-btn py-1.5 text-xs font-semibold rounded-md transition-all bg-emerald-500 text-slate-950 shadow-sm';
+      } else {
+        btn.className = 'format-btn py-1.5 text-xs font-medium rounded-md transition-all text-slate-400 hover:text-white hover:bg-slate-800/50';
+      }
+    });
+  }
+
+  // Handle Format Button Clicks
+  document.querySelectorAll('.format-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      window.AppUtils.playNotification('click');
+      state.options.format = e.target.dataset.format;
+      state.options.preset = 'custom'; // Switch to custom preset
+      updateFormatButtons();
+      initPresets();
+      recompressAll();
+    });
+  });
+
+  // Quality Slider Event
+  qualitySlider.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value, 10);
+    qualityVal.textContent = `${val}%`;
+    state.options.quality = val / 100;
+    state.options.preset = 'custom';
+    initPresets();
+  });
+
+  qualitySlider.addEventListener('change', () => {
+    window.AppUtils.playNotification('click');
+    recompressAll();
+  });
+
+  // Scale Slider Event
+  scaleSlider.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value, 10);
+    scaleVal.textContent = `${val}%`;
+    state.options.scale = val;
+    state.options.preset = 'custom';
+    initPresets();
+  });
+
+  scaleSlider.addEventListener('change', () => {
+    window.AppUtils.playNotification('click');
+    recompressAll();
+  });
+
+  // Resize Input Events
+  resizeWidth.addEventListener('input', (e) => {
+    state.options.preset = 'custom';
+    initPresets();
+    const val = e.target.value ? parseInt(e.target.value, 10) : null;
+    state.options.width = val;
+    
+    if (state.options.lockAspectRatio && val && state.activeFileIndex !== -1) {
+      const activeFile = state.files[state.activeFileIndex];
+      const ratio = activeFile.originalHeight / activeFile.originalWidth;
+      const calculatedHeight = Math.round(val * ratio);
+      resizeHeight.value = calculatedHeight;
+      state.options.height = calculatedHeight;
+    }
+  });
+
+  resizeHeight.addEventListener('input', (e) => {
+    state.options.preset = 'custom';
+    initPresets();
+    const val = e.target.value ? parseInt(e.target.value, 10) : null;
+    state.options.height = val;
+
+    if (state.options.lockAspectRatio && val && state.activeFileIndex !== -1) {
+      const activeFile = state.files[state.activeFileIndex];
+      const ratio = activeFile.originalWidth / activeFile.originalHeight;
+      const calculatedWidth = Math.round(val * ratio);
+      resizeWidth.value = calculatedWidth;
+      state.options.width = calculatedWidth;
+    }
+  });
+
+  // Aspect Ratio Lock Toggle
+  aspectRatioLock.addEventListener('change', (e) => {
+    state.options.lockAspectRatio = e.target.checked;
+  });
+
+  // Strip Metadata Toggle
+  stripMetadata.addEventListener('change', (e) => {
+    state.options.stripMetadata = e.target.checked;
+    recompressAll();
+  });
+
+  // Sound Toggle
+  soundToggleBtn.addEventListener('click', () => {
+    window.AppUtils.soundEnabled = !window.AppUtils.soundEnabled;
+    if (window.AppUtils.soundEnabled) {
+      soundToggleBtn.innerHTML = '<i data-lucide="volume-2" class="w-4 h-4"></i>';
+      soundToggleBtn.className = 'p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all';
+      window.AppUtils.playNotification('click');
+    } else {
+      soundToggleBtn.innerHTML = '<i data-lucide="volume-x" class="w-4 h-4"></i>';
+      soundToggleBtn.className = 'p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:bg-slate-800 text-slate-400 transition-all';
+    }
+    lucide.createIcons();
+  });
+
+  // Reset Workspace
+  resetAppBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.AppUtils.playNotification('delete');
+    state.files = [];
+    state.activeFileIndex = -1;
+    resizeWidth.value = '';
+    resizeHeight.value = '';
+    scaleSlider.value = 100;
+    scaleVal.textContent = '100%';
+    updateWorkspaceVisibility();
+  });
+
+  // Drag & Drop Handlers
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      dropzone.classList.add('border-emerald-500', 'bg-emerald-500/[0.04]');
+    }, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-emerald-500', 'bg-emerald-500/[0.04]');
+    }, false);
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    handleFiles(files);
+  });
+
+  dropzone.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
+  });
+
+  emptyStateUploadBtn.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  // Process Uploaded Files
+  function handleFiles(fileList) {
+    if (fileList.length === 0) return;
+    window.AppUtils.playNotification('upload');
+
+    const promises = Array.from(fileList).map(file => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function(e) {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = function() {
+            resolve({
+              id: Math.random().toString(36).substr(2, 9),
+              name: file.name,
+              file: file,
+              originalSize: file.size,
+              originalUrl: e.target.result,
+              originalWidth: img.naturalWidth,
+              originalHeight: img.naturalHeight,
+              compressedUrl: null,
+              compressedSize: 0,
+              width: img.naturalWidth,
+              height: img.naturalHeight,
+              format: file.type,
+              savings: 0
+            });
+          };
+        };
+      });
+    });
+
+    Promise.all(promises).then(newFiles => {
+      const wasEmpty = state.files.length === 0;
+      state.files = [...state.files, ...newFiles];
+      
+      if (wasEmpty && state.files.length > 0) {
+        state.activeFileIndex = 0;
+      }
+      
+      recompressAll();
+    });
+  }
+
+  // Recompress all files in queue with current settings
+  function recompressAll() {
+    if (state.files.length === 0) return;
+
+    const compressPromises = state.files.map((fileObj, index) => {
+      return window.AppUtils.compressImage(fileObj.file, state.options)
+        .then(result => {
+          fileObj.compressedUrl = result.dataUrl;
+          fileObj.compressedSize = result.size;
+          fileObj.width = result.width;
+          fileObj.height = result.height;
+          fileObj.format = result.format;
+          fileObj.savings = Math.max(0, Math.round(((fileObj.originalSize - result.size) / fileObj.originalSize) * 100));
+        });
+    });
+
+    Promise.all(compressPromises).then(() => {
+      window.AppUtils.playNotification('success');
+      updateWorkspaceVisibility();
+      renderActiveFile();
+      renderBatchList();
+      updateBatchStats();
+    });
+  }
+
+  // Update UI Visibility based on state
+  function updateWorkspaceVisibility() {
+    if (state.files.length > 0) {
+      emptyState.classList.add('hidden');
+      activeWorkspace.classList.remove('hidden');
+    } else {
+      emptyState.classList.remove('hidden');
+      activeWorkspace.classList.add('hidden');
+    }
+  }
+
+  // Render Active File in Comparison Viewer
+  function renderActiveFile() {
+    if (state.activeFileIndex === -1 || state.files.length === 0) return;
+    
+    const activeFile = state.files[state.activeFileIndex];
+    
+    activeFileName.textContent = activeFile.name;
+    activeFileResolution.textContent = `${activeFile.width} x ${activeFile.height} px`;
+    
+    statOriginalSize.textContent = window.AppUtils.formatBytes(activeFile.originalSize);
+    statCompressedSize.textContent = window.AppUtils.formatBytes(activeFile.compressedSize);
+    statSavings.textContent = `-${activeFile.savings}%`;
+
+    // Set image sources
+    originalImg.src = activeFile.originalUrl;
+    compressedImg.src = activeFile.compressedUrl;
+
+    // Reset comparison slider to 50%
+    updateSliderPosition(50);
+  }
+
+  // Render Batch Queue List
+  function renderBatchList() {
+    batchListContainer.innerHTML = '';
+    queueCountBadge.textContent = `${state.files.length} File${state.files.length !== 1 ? 's' : ''}`;
+
+    state.files.forEach((fileObj, index) => {
+      const isActive = index === state.activeFileIndex;
+      const item = document.createElement('div');
+      item.className = `flex items-center justify-between p-3 transition-all ${ 
+        isActive 
+          ? 'bg-emerald-500/10 border-l-4 border-emerald-500' 
+          : 'hover:bg-slate-800/30 border-l-4 border-transparent'
+      }`;
+
+      const formatLabel = window.AppFormats[fileObj.format]?.label || 'WebP';
+
+      item.innerHTML = `
+        <div class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer" id="select-item-${index}">
+          <div class="w-10 h-10 rounded bg-slate-900 border border-slate-800 overflow-hidden shrink-0 flex items-center justify-center">
+            <img src="${fileObj.compressedUrl}" class="w-full h-full object-cover" />
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-semibold text-slate-200 truncate">${fileObj.name}</p>
+            <p class="text-[10px] text-slate-400 font-mono mt-0.5">
+              ${window.AppUtils.formatBytes(fileObj.originalSize)} &rarr; 
+              <span class="text-emerald-400 font-bold">${window.AppUtils.formatBytes(fileObj.compressedSize)}</span>
+            </p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3 shrink-0 ml-4">
+          <span class="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+            -${fileObj.savings}%
+          </span>
+          <span class="text-[10px] text-slate-500 font-mono hidden sm:inline">${formatLabel}</span>
+          <button class="p-1.5 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors" id="download-item-${index}" title="Download">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          </button>
+          <button class="p-1.5 hover:bg-red-500/10 rounded text-slate-500 hover:text-red-400 transition-colors" id="delete-item-${index}" title="Remove">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      `;
+
+      // Event: Select active image
+      item.querySelector(`#select-item-${index}`).addEventListener('click', () => {
+        window.AppUtils.playNotification('click');
+        state.activeFileIndex = index;
+        renderActiveFile();
+        renderBatchList();
+      });
+
+      // Event: Download individual image
+      item.querySelector(`#download-item-${index}`).addEventListener('click', (e) => {
+        e.stopPropagation();
+        downloadFile(fileObj);
+      });
+
+      // Event: Delete individual image
+      item.querySelector(`#delete-item-${index}`).addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.AppUtils.playNotification('delete');
+        state.files.splice(index, 1);
+        if (state.activeFileIndex >= state.files.length) {
+          state.activeFileIndex = state.files.length - 1;
+        }
+        updateWorkspaceVisibility();
+        recompressAll();
+      });
+
+      batchListContainer.appendChild(item);
+    });
+
+    lucide.createIcons();
+  }
+
+  // Update Batch Summary Stats
+  function updateBatchStats() {
+    if (state.files.length === 0) return;
+
+    const totalOriginal = state.files.reduce((sum, f) => sum + f.originalSize, 0);
+    const totalCompressed = state.files.reduce((sum, f) => sum + f.compressedSize, 0);
+    const totalSavedBytes = Math.max(0, totalOriginal - totalCompressed);
+    const totalSavingsPct = Math.round((totalSavedBytes / totalOriginal) * 100);
+
+    batchTotalOriginal.textContent = window.AppUtils.formatBytes(totalOriginal);
+    batchTotalCompressed.textContent = window.AppUtils.formatBytes(totalCompressed);
+    batchTotalSavings.innerHTML = `
+      -${totalSavingsPct}% 
+      <span class="text-xs font-normal text-slate-400">(${window.AppUtils.formatBytes(totalSavedBytes)} saved)</span>
+    `;
+  }
+
+  // Download Single File Helper
+  function downloadFile(fileObj) {
+    window.AppUtils.playNotification('success');
+    const link = document.createElement('a');
+    link.href = fileObj.compressedUrl;
+    
+    // Determine extension
+    const formatInfo = window.AppFormats[fileObj.format];
+    const ext = formatInfo ? formatInfo.ext : 'webp';
+    const baseName = fileObj.name.substring(0, fileObj.name.lastIndexOf('.')) || fileObj.name;
+    
+    link.download = `${baseName}-optisqueeze.${ext}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Download Active Button Event
+  downloadActiveBtn.addEventListener('click', () => {
+    if (state.activeFileIndex !== -1) {
+      downloadFile(state.files[state.activeFileIndex]);
+    }
+  });
+
+  // Download All Button Event
+  downloadAllBtn.addEventListener('click', () => {
+    if (state.files.length === 0) return;
+    state.files.forEach(fileObj => {
+      downloadFile(fileObj);
+    });
+  });
+
+  // Interactive Split Screen Slider Logic
+  let isDragging = false;
+
+  function updateSliderPosition(percentage) {
+    // Clamp percentage between 0 and 100
+    const clamped = Math.max(0, Math.min(100, percentage));
+    sliderHandle.style.left = `${clamped}%`;
+    compressedWrapper.style.clipPath = `inset(0 0 0 ${clamped}%)`;
+  }
+
+  function handleSliderMove(clientX) {
+    const rect = comparisonContainer.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const percentage = (x / rect.width) * 100;
+    updateSliderPosition(percentage);
+  }
+
+  // Mouse Events
+  sliderHandle.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    e.preventDefault();
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    handleSliderMove(e.clientX);
+  });
+
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+
+  // Touch Events for Mobile
+  sliderHandle.addEventListener('touchstart', (e) => {
+    isDragging = true;
+  });
+
+  window.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    if (e.touches.length > 0) {
+      handleSliderMove(e.touches[0].clientX);
+    }
+  });
+
+  window.addEventListener('touchend', () => {
+    isDragging = false;
+  });
+
+  // Click anywhere on container to move slider
+  comparisonContainer.addEventListener('click', (e) => {
+    if (e.target !== sliderHandle && !sliderHandle.contains(e.target)) {
+      handleSliderMove(e.clientX);
+    }
+  });
+
+  // Zoom / Fit Toggle Button
+  let isZoomed = false;
+  zoomInBtn.addEventListener('click', () => {
+    window.AppUtils.playNotification('click');
+    isZoomed = !isZoomed;
+    if (isZoomed) {
+      originalImg.classList.remove('object-contain');
+      originalImg.classList.add('object-cover');
+      compressedImg.classList.remove('object-contain');
+      compressedImg.classList.add('object-cover');
+      zoomInBtn.innerHTML = '<i data-lucide="minimize" class="w-4 h-4"></i>';
+    } else {
+      originalImg.classList.remove('object-cover');
+      originalImg.classList.add('object-contain');
+      compressedImg.classList.remove('object-cover');
+      compressedImg.classList.add('object-contain');
+      zoomInBtn.innerHTML = '<i data-lucide="maximize" class="w-4 h-4"></i>';
+    }
+    lucide.createIcons();
+  });
+
+  // Initialize App
+  initPresets();
+  updateFormatButtons();
+  lucide.createIcons();
+});
+
+</script></body>
+</html>
